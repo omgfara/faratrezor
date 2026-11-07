@@ -1,0 +1,11 @@
+{
+  "name": "faratrezor",
+  "main": "worker.js",
+  "compatibility_date": "2026-11-01",
+  "vars": {
+    "ALLOW_ORIGIN": "https://omgfara.github.io"
+  },
+  "kv_namespaces": [
+    { "binding": "KV", "id": "33f6769ff8dd406ca71032db3a258d04" }
+  ]
+}
