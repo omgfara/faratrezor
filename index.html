@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1017">
+<title>fara Trezor – tvoj sigurni trezor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%234fd1b0'/%3E%3Cpath d='M12 4l6 2.2v4.6c0 3.5-2.4 6-6 7.2-3.6-1.2-6-3.7-6-7.2V6.2z' fill='none' stroke='%2307211b' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>if(top!==self){document.documentElement.style.display="none"}</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="lg" viewBox="0 0 24 24"><path d="M12 2.8l7.5 2.8v5.9c0 4.5-3 7.8-7.5 9.5-4.5-1.7-7.5-5-7.5-9.5V5.6z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="10.2" r="2" fill="currentColor"/><path d="M12 12.2v3.4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol></svg>
+
+<section id="lock" class="lock">
+  <form id="lockForm" class="lock-card" autocomplete="off" novalidate>
+    <div class="logo"><svg class="lg"><use href="#lg"/></svg></div>
+    <div class="wm lock-wm"><i>fara</i> Trezor</div>
+    <div id="authTabs" class="tabs hidden"><button type="button" data-m="login" class="on">Prijava</button><button type="button" data-m="register">Registracija</button><button type="button" data-m="local">Samo ovaj uređaj</button></div>
+    <h1 id="lockTitle">Otključaj trezor</h1>
+    <p id="lockSub" class="muted"></p>
+    <input type="text" id="authUser" class="hidden" placeholder="E-mail ili korisničko ime" autocapitalize="off" spellcheck="false">
+    <div class="pw"><input type="password" id="master" placeholder="Glavna šifra" autofocus><button type="button" id="eye" class="mini">Prikaži</button></div>
+    <input type="password" id="master2" placeholder="Ponovi glavnu šifru" class="hidden">
+    <input type="text" id="authTotp" class="hidden" inputmode="numeric" placeholder="Šestocifreni kod ili kod za oporavak" autocomplete="off">
+    <ul id="policy" class="policy hidden"></ul>
+    <details id="adv" class="adv hidden"><summary>Napredno</summary>
+      <input id="authInvite" placeholder="Kod pozivnice (ako ga server traži)" autocomplete="off">
+      <input id="authApi" placeholder="Adresa servera (prazno = ovaj sajt)" autocomplete="off"></details>
+    <div id="srvNote" class="srvnote"></div>
+    <div id="caps" class="caps hidden">⇪ Caps Lock je uključen</div>
+    <div id="lockMsg" class="error" role="alert"></div>
+    <button class="btn primary wide" id="lockBtn">Otključaj</button>
+    <p class="hint hidden" id="lockHint">Glavnu šifru niko ne može vratiti, ni mi ni server. Zapamti je dobro.</p>
+  </form>
+</section>
+
+<div id="app" class="app hidden">
+  <aside class="side">
+    <div class="brand"><div class="logo sm"><svg class="lg"><use href="#lg"/></svg></div><span class="wm"><i>fara</i> Trezor</span></div>
+    <p class="navlabel">Kategorije</p>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <div class="enc" id="syncPill"><i></i><span>Šifrovano · samo ovaj uređaj</span></div>
+      <button class="btn ghost" id="toolsBtn"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M17.5 14v7M14 17.5h7"/></svg><span class="l">Alati</span><span class="s">Alati</span></button>
+      <button class="btn ghost" id="secBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span class="l">Sigurnosni pregled</span><span class="s">Pregled</span></button>
+      <button class="btn ghost" id="setBtn"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span class="l">Postavke</span><span class="s">Postavke</span></button>
+      <button class="btn ghost" id="lockNow" title="Prečica: Alt+L"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg><span class="l">Zaključaj</span><span class="s">Zaključaj</span></button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="tripBar" class="banner trip hidden"></div>
+    <div id="alert" class="banner warn hidden"></div>
+    <div id="tip" class="banner tip hidden"></div>
+    <div id="banner" class="banner hidden"></div>
+    <header class="hero">
+      <div><p class="eyebrow" id="greet"></p><h1 id="heroTitle">Tvoj trezor</h1><p class="muted" id="heroSub"></p></div>
+      <button class="btn primary" id="addBtn">+ Novi unos</button>
+    </header>
+    <section class="stats" id="stats">
+      <div class="stat"><span>Ukupno unosa</span><b id="stTotal">0</b><small>u trezoru</small></div>
+      <button class="stat link ring-stat" id="stHealthBtn"><div class="ring" id="stRing"><b id="stHealth">100%</b></div><div><span>Zdravlje šifri</span><small>Klikni za sigurnosni pregled</small></div></button>
+      <div class="stat"><span>Za provjeru</span><b id="stIssues">0</b><small>slabe, duplirane, stare ili procurene</small></div>
+    </section>
+    <div class="toolbar">
+      <div class="searchbox"><svg class="ic" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input type="search" id="search" placeholder="Pretraži trezor…  ( / )"></div>
+      <button class="kbd" id="cmdBtn" title="Brze komande (Ctrl+K)">Ctrl K</button>
+      <div class="popwrap"><button class="tbtn2" id="viewBtn" aria-label="Sortiranje i grupisanje" title="Sortiranje i grupisanje"><svg class="ic" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+        <div class="pop" id="viewPop"><b class="plabel">Sortiranje</b>
+          <div class="segc" id="sortSeg" data-pref="sort"><button data-v="name">A – Ž</button><button data-v="updated">Najnovije</button></div>
+          <b class="plabel">Grupisanje</b>
+          <div class="segc" id="groupSeg" data-pref="group"><button data-v="none">Bez</button><button data-v="letter">Slova</button><button data-v="cat">Vrste</button></div></div></div>
+      <div class="popwrap"><button class="tbtn2" id="themeBtn" aria-label="Tema" title="Tema"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3a9 9 0 100 18c1.6 0 2-1 1.5-2-.6-1.2.2-2.5 1.6-2.5H17a4 4 0 004-4c0-5-4-9.5-9-9.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10.5" cy="7" r="1"/><circle cx="15.5" cy="7.5" r="1"/></svg></button>
+        <div class="pop" id="themePop"><b class="plabel">Tema</b><div id="themes" class="themes"></div></div></div>
+      <div class="seg" role="group" aria-label="Prikaz">
+        <button id="vGrid" aria-label="Kartice"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+        <button id="vList" aria-label="Lista"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      </div>
+    </div>
+    <div id="list" class="list"></div>
+    <div id="empty" class="empty hidden">
+      <div class="big">🔐</div>
+      <h2>Ovdje još nema ničega</h2>
+      <p class="muted">Dodaj prvi unos ili uvezi CSV u Postavkama.</p>
+      <button class="btn primary" id="emptyAdd">+ Dodaj prvi unos</button>
+    </div>
+  </main>
+</div>
+
+<button id="fab" class="fab hidden" aria-label="Novi unos"><b>+</b><span>Novi unos</span></button>
+<div id="scrim" class="scrim"></div>
+<aside id="panel" class="panel" aria-hidden="true"><div id="panelBody" class="pbody"></div></aside>
+
+<dialog id="dlg">
+  <form id="entryForm" method="dialog">
+    <h2 id="dlgTitle">Novi unos</h2>
+    <div id="topFields">
+      <label>Vrsta <select id="type"></select></label>
+      <label>Naslov <input id="title" required placeholder="npr. Instagram"></label>
+    </div>
+    <div class="look">
+      <label>Emoji <input id="emoji" maxlength="4" placeholder="😀" autocomplete="off"></label>
+      <div><span class="lbl">Boja</span><div id="ecolors" class="swatches"></div></div>
+    </div>
+    <button type="button" class="btn ghost hidden" id="scanBtn">📷 Skeniraj karticu kamerom</button>
+    <div id="fields"></div>
+    <div class="duebox">
+      <label>Ističe / podsjetnik <input type="date" id="due"></label>
+      <label>Ponavljanje <select id="rep"><option value="">jednokratno</option><option value="m">svaki mjesec</option><option value="y">svake godine</option></select></label>
+      <label id="linkWrap">Pripada mejlu (za mapu povezanosti) <select id="link"></select></label>
+    </div>
+    <div id="meter" class="hidden"><div class="meter"><i></i></div><small id="mtxt"></small></div>
+    <details id="histBox" class="hidden"><summary id="histSum"></summary><div id="hist"></div></details>
+    <div class="att">
+      <div class="row"><b class="lbl">Prilozi (slike)</b><span class="grow"></span>
+        <button type="button" class="mini" id="attBtn">+ Dodaj sliku</button></div>
+      <input type="file" id="attFile" accept="image/*" multiple class="hidden">
+      <div id="atts" class="thumbs"></div>
+    </div>
+    <div class="row end">
+      <button type="button" class="btn danger hidden" id="delBtn">Obriši</button>
+      <span class="grow"></span>
+      <button type="button" class="btn ghost" id="cancelBtn">Odustani</button>
+      <button class="btn primary" id="saveBtn">Sačuvaj</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="genDlg">
+  <div class="gen">
+    <h2>Generator šifri</h2>
+    <input id="genOut" readonly>
+    <div class="meter" style="margin-top:10px"><i id="genBar"></i></div>
+    <label>Dužina: <b id="lenVal">16</b>
+      <input type="range" id="len" min="8" max="40" value="16"></label>
+    <label class="check"><input type="checkbox" id="optSym" checked> Simboli</label>
+    <div class="row end">
+      <button class="btn ghost" id="genCopy">Kopiraj</button>
+      <button class="btn ghost" id="genNew">Nova</button>
+      <button class="btn primary" id="genClose">Zatvori</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="sDlg" class="sheet">
+  <div class="dhd"><h2>Postavke</h2><button class="mini x" id="sClose" aria-label="Zatvori">✕</button></div>
+  <section class="scard"><h3>Profil</h3>
+    <label class="fieldl">Tvoje ime<input id="nameIn" maxlength="24" placeholder="npr. Fara" autocomplete="off"></label>
+    <small class="hintl">Koristi se u pozdravu na početnoj.</small></section>
+  <section class="scard"><h3>Izgled</h3>
+    <b class="lbl">Boja akcenta</b><div id="swatches" class="swatches"></div>
+    <label class="swrow"><span><b>Ikone sajtova</b><small>Prikazuje logo sajta (šalje domenu Googleu)</small></span><input type="checkbox" id="optIcons" class="switch"></label></section>
+  <section class="scard"><h3>Sigurnost</h3>
+    <div class="fld"><b>Zaključaj nakon neaktivnosti</b><div class="segc" id="lockMinSeg" data-pref="lockMin" data-num><button data-v="1">1 min</button><button data-v="5">5 min</button><button data-v="15">15 min</button><button data-v="30">30 min</button></div></div>
+    <div class="fld"><b>Kad napustim prozor</b><div class="segc" id="lockHiddenSeg" data-pref="lockHidden" data-num><button data-v="-1">Ništa</button><button data-v="0">Odmah</button><button data-v="30">30 s</button><button data-v="60">1 min</button></div></div>
+    <label class="swrow"><span><b>Zamuti ekran</b><small>čim prozor izgubi fokus</small></span><input type="checkbox" id="optBlur" class="switch"></label>
+    <label class="swrow"><span><b>Pojačana zaštita</b><small>bez označavanja teksta, desnog klika i štampe</small></span><input type="checkbox" id="optNoCap" class="switch"></label></section>
+  <section class="scard"><h3>Račun</h3>
+    <button class="lrowbtn" id="accBtn"><span>Račun i prijava</span><i>›</i></button>
+    <button class="lrowbtn" id="pwBtn"><span>Promijeni glavnu šifru</span><i>›</i></button>
+    <button class="lrowbtn" id="logBtn"><span>Dnevnik aktivnosti</span><i>›</i></button></section>
+  <section class="scard"><h3>O aplikaciji</h3>
+    <button class="lrowbtn" id="chgBtn"><span>Šta je novo <em class="vpill" id="verPill"></em></span><i>›</i></button></section>
+  <input type="file" id="csvFile" accept=".csv" class="hidden"><input type="file" id="importFile" accept=".json" class="hidden">
+</dialog>
+
+<dialog id="secDlg"><h2>Sigurnosni pregled</h2><div id="secBody"></div><div class="row end"><span class="grow"></span><button class="btn primary" id="secClose">Zatvori</button></div></dialog>
+
+<dialog id="pdfDlg">
+  <h2>Izvoz u PDF</h2>
+  <label class="check"><input type="radio" name="pdfmode" value="all" checked> Sve unose (preuzmi odmah)</label>
+  <label class="check"><input type="radio" name="pdfmode" value="pick"> Odaberi koje unose želim</label>
+  <div id="pdfPick" class="pick hidden"></div>
+  <label class="check"><input type="checkbox" id="pdfSep"> Zaseban PDF za svaki unos</label>
+  <p class="muted small">PDF sadrži šifre u čitljivom obliku. Čuvaj ga na sigurnom mjestu.</p>
+  <div class="row end"><span id="pdfCount" class="muted small"></span><span class="grow"></span>
+    <button type="button" class="btn ghost" id="pdfCancel">Odustani</button><button type="button" class="btn primary" id="pdfGo">Preuzmi PDF</button></div>
+</dialog>
+
+<dialog id="logDlg"><h2>Dnevnik aktivnosti</h2><div id="logBody"></div>
+  <div class="row end"><button class="btn danger" id="logClear">Obriši dnevnik</button><span class="grow"></span><button class="btn primary" id="logClose">Zatvori</button></div></dialog>
+
+<dialog id="cmd" class="cmd"><input id="cmdIn" placeholder="Traži unos ili komandu…" autocomplete="off" aria-label="Brze komande"><div id="cmdList"></div></dialog>
+
+<dialog id="askDlg"><form id="askForm" method="dialog"><h2 id="askT"></h2><label><span id="askL"></span><input id="askIn" autocomplete="off"></label>
+  <div class="row end"><span class="grow"></span><button type="button" class="btn ghost" id="askNo">Odustani</button><button class="btn primary">U redu</button></div></form></dialog>
+
+<dialog id="accDlg"><h2>Račun i prijava</h2><div id="accBody"></div><div id="accSub"></div><div class="row end"><span class="grow"></span><button class="btn primary" id="accClose">Zatvori</button></div></dialog>
+
+<dialog id="toolsDlg" class="sheet">
+  <div class="dhd"><h2>Alati</h2><button class="mini x" data-tool="close" aria-label="Zatvori">✕</button></div>
+  <p class="tgroup">Pregled</p>
+  <div class="tools"><button data-tool="map" style="--c:#6ea8fe"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7l8 1M7.5 8l3.5 8M16.5 10.5L13 16"/></svg></i><span>Mapa povezanosti</span><small>Koji mejl otključava koje račune</small></button><button data-tool="tl" style="--c:#f6a35c"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></i><span>Vremenska linija</span><small>Rokovi, kartice i pretplate</small></button><button data-tool="sec" style="--c:#4fd1b0"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></i><span>Sigurnosni pregled</span><small>Slabe, stare i procurene šifre</small></button></div>
+  <p class="tgroup">Za svaki slučaj</p>
+  <div class="tools"><button data-tool="gen" style="--c:#e2c044"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/><circle cx="9" cy="15" r="1"/><circle cx="15" cy="15" r="1"/></svg></i><span>Generator šifri</span><small>Jake nasumične šifre</small></button><button data-tool="trip" style="--c:#b794f6"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M3 13l18-9-5 17-4-7z"/><path d="M12 14l4-5"/></svg></i><span>Putni mod</span><small>Sakrij sve osim potrebnog</small></button><button data-tool="ice" style="--c:#ff5c5c"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/><path d="M12 9v5M9.5 11.5h5"/></svg></i><span>Hitna kartica</span><small>PDF za novčanik</small></button></div>
+  <p class="tgroup">Podaci</p>
+  <div class="tools"><button data-tool="pdf" style="--c:#ef6f9a"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 14h6M9 17h4"/></svg></i><span>Izvoz u PDF</span><small>Sve ili samo odabrano</small></button><button data-tool="export" style="--c:#7bd88f"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14"/></svg></i><span>Šifrovani backup</span><small>Preuzmi .json kopiju</small></button><button data-tool="import" style="--c:#8fb3c9"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5M5 20h14"/></svg></i><span>Uvezi backup</span><small>Vrati iz .json kopije</small></button><button data-tool="csv" style="--c:#8fb3c9"><i class="ti"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16"/></svg></i><span>Uvezi CSV</span><small>Chrome, Bitwarden…</small></button></div>
+</dialog>
+
+<dialog id="chgDlg" class="sheet"><div class="dhd"><h2>Šta je novo</h2><button class="mini x" id="chgClose" aria-label="Zatvori">✕</button></div><div id="chgBody"></div></dialog>
+
+<dialog id="mapDlg" class="wide"><h2>Mapa povezanosti</h2><div id="mapBody"></div><div class="row end"><span class="grow"></span><button class="btn primary" id="mapClose">Zatvori</button></div></dialog>
+
+<dialog id="tlDlg" class="wide"><h2>Vremenska linija</h2><div id="tlBody"></div><div class="row end"><span class="grow"></span><button class="btn primary" id="tlClose">Zatvori</button></div></dialog>
+
+<dialog id="tripDlg"><h2>Putni mod</h2>
+  <p class="muted small">Označi unose koje trebaš na putu. Kad uključiš mod, ostali se sakrivaju s ekrana dok ga ne isključiš glavnom šifrom. Ovo sakriva prikaz; za stvarnu zaštitu (npr. na granici) se uz to odjavi s uređaja.</p>
+  <div id="tripPick" class="pick"></div>
+  <div class="row end"><span id="tripCount" class="muted small"></span><span class="grow"></span><button type="button" class="btn ghost" id="tripCancel">Zatvori</button><button type="button" class="btn primary" id="tripGo">Uključi putni mod</button></div></dialog>
+
+<dialog id="wizDlg"><div id="wizBody"></div></dialog>
+
+<dialog id="scanDlg"><h2>Skeniraj karticu</h2><video id="scanVid" autoplay playsinline muted></video>
+  <p class="muted small">Drži karticu ravno i dobro osvijetljenu. Slika se ne šalje nikuda.</p>
+  <div class="row end"><span class="grow"></span><button type="button" class="btn ghost" id="scanNo">Odustani</button><button type="button" class="btn primary" id="scanGo">Snimi</button></div></dialog>
+
+<dialog id="pwDlg">
+  <form id="pwForm" method="dialog">
+    <h2>Nova glavna šifra</h2>
+    <label>Trenutna šifra <input type="password" id="pwOld" required></label>
+    <label>Nova šifra <input type="password" id="pwNew" required></label>
+    <ul id="pwPolicy" class="policy"></ul>
+    <label>Ponovi novu šifru <input type="password" id="pwNew2" required></label>
+    <div id="pwMsg" class="error" role="alert"></div>
+    <div class="row end"><span class="grow"></span>
+      <button type="button" class="btn ghost" id="pwCancel">Odustani</button>
+      <button class="btn primary">Promijeni</button></div>
+  </form>
+</dialog>
+
+<dialog id="imgDlg" class="imgdlg"><img id="bigImg" alt="Prilog"><div class="row end"><span class="grow"></span><button class="btn primary" id="imgClose">Zatvori</button></div></dialog>
+
+<div id="peek" class="peek" aria-hidden="true"></div>
+<div id="shield" class="shield"><div><div class="logo"><svg class="lg"><use href="#lg"/></svg></div><h2>Sadržaj je sakriven!</h2><p class="muted">Klikni bilo gdje da nastaviš.</p></div></div>
+<div id="toast" class="toast" role="status"></div>
+<script src="config.js"></script>
+<script src="pdf.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
